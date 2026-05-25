@@ -21,12 +21,9 @@ export default function Home() {
         >
           ¡Entrar!
         </Link>
-        <Link
-          href="/login"
-          className="bg-green-700 text-white font-bold text-base py-3 rounded-3xl border-2 border-green-200 hover:bg-green-800 transition-colors"
-        >
-          Crear cuenta gratis
-        </Link>
+        <p className="text-green-100 text-xs text-center">
+          ¿No tenés cuenta? Pedile un link de invitación a quien te invitó al grupo.
+        </p>
       </div>
 
       <div className="mt-12 grid grid-cols-3 gap-4 text-center max-w-xs">
