@@ -89,9 +89,14 @@ export default function LoginPage() {
           de tu grupo para registrarte.
         </p>
 
-        <p className="text-center text-gray-300 text-xs mt-6">
-          Aplicación creada por el papá de Ele y Mati 💚
-        </p>
+        <div className="mt-6 bg-green-50 rounded-2xl px-4 py-3 text-center">
+          <p className="text-green-700 text-sm font-semibold">
+            👨‍👧‍👧 Creada por el papá de Ele y Mati
+          </p>
+          <p className="text-green-600 text-xs mt-1">
+            App privada para intercambiar figuritas entre conocidos, de forma segura.
+          </p>
+        </div>
       </div>
     </div>
   );

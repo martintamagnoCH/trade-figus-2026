@@ -49,6 +49,15 @@ export default function Home() {
           </p>
         </div>
       </div>
+
+      <div className="mt-10 bg-white/20 rounded-2xl px-5 py-4 max-w-xs text-center">
+        <p className="text-white text-sm font-semibold">
+          👨‍👧‍👧 Creada por el papá de Ele y Mati
+        </p>
+        <p className="text-green-100 text-xs mt-1">
+          App privada para intercambiar figuritas entre conocidos, de forma segura.
+        </p>
+      </div>
     </div>
   );
 }
