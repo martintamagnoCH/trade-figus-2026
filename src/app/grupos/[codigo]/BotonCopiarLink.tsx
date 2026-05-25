@@ -31,11 +31,6 @@ export default function BotonCopiarLink({ token, esCreador }: Props) {
           ? "Mandá este link por WhatsApp para que tus amigos se puedan registrar y unirse."
           : "Compartí este link con quien quieras invitar al grupo."}
       </p>
-      {link && (
-        <p className="text-xs text-gray-500 bg-gray-50 rounded-xl px-3 py-2 mb-3 break-all font-mono">
-          {link}
-        </p>
-      )}
       <button
         onClick={copiar}
         className={`w-full py-3 rounded-2xl font-black text-sm transition-colors ${
