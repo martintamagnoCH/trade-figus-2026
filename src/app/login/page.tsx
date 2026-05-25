@@ -88,6 +88,10 @@ export default function LoginPage() {
           <span className="font-semibold text-green-600">link de invitación</span>{" "}
           de tu grupo para registrarte.
         </p>
+
+        <p className="text-center text-gray-300 text-xs mt-6">
+          Aplicación creada por el papá de Ele y Mati 💚
+        </p>
       </div>
     </div>
   );
