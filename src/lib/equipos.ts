@@ -54,3 +54,14 @@ export const EQUIPOS: Record<string, { nombre: string; iso: string | null; emoji
 export function getPrefijo(codigo: string): string {
   return codigo.match(/^([A-Z]+)/)?.[1] ?? "?";
 }
+
+// Orden exacto en que aparecen las secciones en el álbum Panini FIFA 2026
+export const ORDEN_ALBUM = [
+  "FWC", "MUS",
+  "ALG", "ARG", "AUS", "AUT", "BEL", "BIH", "BRA", "CAN",
+  "CIV", "COD", "COL", "CPV", "CRO", "CUW", "CZE", "ECU",
+  "EGY", "ENG", "ESP", "FRA", "GER", "GHA", "HAI", "IRN",
+  "IRQ", "JOR", "JPN", "KOR", "KSA", "MAR", "MEX", "NED",
+  "NOR", "NZL", "PAN", "PAR", "POR", "QAT", "RSA", "SCO",
+  "SEN", "SUI", "SWE", "TUN", "TUR", "URU", "USA", "UZB",
+];

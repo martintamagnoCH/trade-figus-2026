@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import FiguPill, { Bandera } from "@/components/FiguPill";
-import { EQUIPOS, getPrefijo } from "@/lib/equipos";
+import { EQUIPOS, getPrefijo, ORDEN_ALBUM } from "@/lib/equipos";
 
 type Figurita = { id: string; numero: string; repetidas: number };
 type Faltante = { id: string; numero: string };
@@ -36,7 +36,13 @@ export default function MisFiguritas() {
       if (!grupos.has(prefijo)) grupos.set(prefijo, []);
       grupos.get(prefijo)!.push(f);
     }
-    return grupos;
+    return new Map(
+      [...grupos.entries()].sort(([a], [b]) => {
+        const ia = ORDEN_ALBUM.indexOf(a);
+        const ib = ORDEN_ALBUM.indexOf(b);
+        return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+      })
+    );
   }, [repetidas]);
 
   const faltantesAgrupadas = useMemo(() => {
@@ -46,7 +52,13 @@ export default function MisFiguritas() {
       if (!grupos.has(prefijo)) grupos.set(prefijo, []);
       grupos.get(prefijo)!.push(f);
     }
-    return grupos;
+    return new Map(
+      [...grupos.entries()].sort(([a], [b]) => {
+        const ia = ORDEN_ALBUM.indexOf(a);
+        const ib = ORDEN_ALBUM.indexOf(b);
+        return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+      })
+    );
   }, [faltantes]);
 
   const cargarDatos = useCallback(async (uid: string) => {
