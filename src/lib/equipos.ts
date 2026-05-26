@@ -1,7 +1,6 @@
 export const EQUIPOS: Record<string, { nombre: string; iso: string | null; emoji?: string }> = {
   "00": { nombre: "Apertura",             iso: null, emoji: "⚽" },
   FWC:  { nombre: "Apertura",             iso: null, emoji: "⚽" },
-  MUS:  { nombre: "FIFA Museum",          iso: null, emoji: "🏆" },
   HIS:  { nombre: "Historia",             iso: null, emoji: "📖" },
   ALG: { nombre: "Algeria",              iso: "dz" },
   ARG: { nombre: "Argentina",            iso: "ar" },
@@ -62,7 +61,7 @@ export function getPrefijo(codigo: string): string {
 
 // Orden del álbum Panini FIFA 2026: primero especiales, luego equipos por grupo
 export const ORDEN_ALBUM = [
-  "00", "FWC", "MUS",
+  "00", "FWC",
   // Grupo A
   "MEX", "KOR", "RSA", "CZE",
   // Grupo B

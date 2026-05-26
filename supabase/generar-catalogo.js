@@ -76,23 +76,8 @@ for (let n = 9; n <= 19; n++) {
   rows.push({ codigo: `FWC${n}`, descripcion: 'Historia del Mundial', seccion: 'Historia' });
 }
 
-// Sección FIFA Museum (MUS1-MUS11)
-const museum = [
-  'Uruguay 1930 (FOIL)',
-  'Italia 1934 & 1938 (FOIL)',
-  'Brasil 1958 & 1962 (FOIL)',
-  'Inglaterra 1966 (FOIL)',
-  'Brasil 1970 (FOIL)',
-  'Alemania 1974 (FOIL)',
-  'Argentina 1978 & 1986 (FOIL)',
-  'Italia 1982 & 2006 (FOIL)',
-  'Alemania 1990 & 2014 (FOIL)',
-  'Brasil 1994 (FOIL)',
-  'Francia 1998 & 2018 (FOIL)',
-];
-museum.forEach((desc, i) => {
-  rows.push({ codigo: `MUS${i + 1}`, descripcion: desc, seccion: 'FIFA Museum' });
-});
+// Nota: la sección "FIFA Museum" no existe en este álbum.
+// Los FWC9-FWC19 cubren la sección Historia.
 
 // Stickers por equipo (20 por equipo)
 for (const equipo of equipos) {
