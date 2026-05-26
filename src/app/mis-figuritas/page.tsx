@@ -8,6 +8,63 @@ type Figurita = { id: string; numero: string; repetidas: number };
 type Faltante = { id: string; numero: string };
 type CatalogoItem = { codigo: string; descripcion: string; seccion: string };
 
+const EQUIPOS: Record<string, { nombre: string; bandera: string }> = {
+  FWC: { nombre: "Apertura",             bandera: "⚽" },
+  MUS: { nombre: "FIFA Museum",          bandera: "🏆" },
+  ALG: { nombre: "Algeria",             bandera: "🇩🇿" },
+  ARG: { nombre: "Argentina",           bandera: "🇦🇷" },
+  AUS: { nombre: "Australia",           bandera: "🇦🇺" },
+  AUT: { nombre: "Austria",             bandera: "🇦🇹" },
+  BEL: { nombre: "Bélgica",             bandera: "🇧🇪" },
+  BIH: { nombre: "Bosnia y Herzegovina",bandera: "🇧🇦" },
+  BRA: { nombre: "Brasil",              bandera: "🇧🇷" },
+  CAN: { nombre: "Canadá",              bandera: "🇨🇦" },
+  CIV: { nombre: "Costa de Marfil",     bandera: "🇨🇮" },
+  COD: { nombre: "Congo DR",            bandera: "🇨🇩" },
+  COL: { nombre: "Colombia",            bandera: "🇨🇴" },
+  CPV: { nombre: "Cabo Verde",          bandera: "🇨🇻" },
+  CRO: { nombre: "Croacia",             bandera: "🇭🇷" },
+  CUW: { nombre: "Curaçao",             bandera: "🇨🇼" },
+  CZE: { nombre: "República Checa",     bandera: "🇨🇿" },
+  ECU: { nombre: "Ecuador",             bandera: "🇪🇨" },
+  EGY: { nombre: "Egipto",              bandera: "🇪🇬" },
+  ENG: { nombre: "Inglaterra",          bandera: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
+  ESP: { nombre: "España",              bandera: "🇪🇸" },
+  FRA: { nombre: "Francia",             bandera: "🇫🇷" },
+  GER: { nombre: "Alemania",            bandera: "🇩🇪" },
+  GHA: { nombre: "Ghana",               bandera: "🇬🇭" },
+  HAI: { nombre: "Haití",               bandera: "🇭🇹" },
+  IRN: { nombre: "Irán",                bandera: "🇮🇷" },
+  IRQ: { nombre: "Irak",                bandera: "🇮🇶" },
+  JOR: { nombre: "Jordania",            bandera: "🇯🇴" },
+  JPN: { nombre: "Japón",               bandera: "🇯🇵" },
+  KOR: { nombre: "Corea del Sur",       bandera: "🇰🇷" },
+  KSA: { nombre: "Arabia Saudita",      bandera: "🇸🇦" },
+  MAR: { nombre: "Marruecos",           bandera: "🇲🇦" },
+  MEX: { nombre: "México",              bandera: "🇲🇽" },
+  NED: { nombre: "Países Bajos",        bandera: "🇳🇱" },
+  NOR: { nombre: "Noruega",             bandera: "🇳🇴" },
+  NZL: { nombre: "Nueva Zelanda",       bandera: "🇳🇿" },
+  PAN: { nombre: "Panamá",              bandera: "🇵🇦" },
+  PAR: { nombre: "Paraguay",            bandera: "🇵🇾" },
+  POR: { nombre: "Portugal",            bandera: "🇵🇹" },
+  QAT: { nombre: "Qatar",               bandera: "🇶🇦" },
+  RSA: { nombre: "Sudáfrica",           bandera: "🇿🇦" },
+  SCO: { nombre: "Escocia",             bandera: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
+  SEN: { nombre: "Senegal",             bandera: "🇸🇳" },
+  SUI: { nombre: "Suiza",               bandera: "🇨🇭" },
+  SWE: { nombre: "Suecia",              bandera: "🇸🇪" },
+  TUN: { nombre: "Túnez",               bandera: "🇹🇳" },
+  TUR: { nombre: "Turquía",             bandera: "🇹🇷" },
+  URU: { nombre: "Uruguay",             bandera: "🇺🇾" },
+  USA: { nombre: "Estados Unidos",      bandera: "🇺🇸" },
+  UZB: { nombre: "Uzbekistán",          bandera: "🇺🇿" },
+};
+
+function getPrefijo(codigo: string): string {
+  return codigo.match(/^([A-Z]+)/)?.[1] ?? "?";
+}
+
 export default function MisFiguritas() {
   const supabase = createClient();
 
@@ -25,6 +82,26 @@ export default function MisFiguritas() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const codigosValidos = useMemo(() => new Set(catalogo.map((c) => c.codigo)), [catalogo]);
+
+  const repetidasAgrupadas = useMemo(() => {
+    const grupos = new Map<string, Figurita[]>();
+    for (const f of repetidas) {
+      const prefijo = getPrefijo(f.numero);
+      if (!grupos.has(prefijo)) grupos.set(prefijo, []);
+      grupos.get(prefijo)!.push(f);
+    }
+    return grupos;
+  }, [repetidas]);
+
+  const faltantesAgrupadas = useMemo(() => {
+    const grupos = new Map<string, Faltante[]>();
+    for (const f of faltantes) {
+      const prefijo = getPrefijo(f.numero);
+      if (!grupos.has(prefijo)) grupos.set(prefijo, []);
+      grupos.get(prefijo)!.push(f);
+    }
+    return grupos;
+  }, [faltantes]);
 
   const cargarDatos = useCallback(async (uid: string) => {
     const [{ data: rep }, { data: fal }] = await Promise.all([
@@ -283,6 +360,7 @@ export default function MisFiguritas() {
                     onClick={() => agregarPill(s.codigo)}
                     className="w-full text-left px-4 py-2 hover:bg-green-50 flex items-center gap-3 border-b border-gray-100 last:border-0"
                   >
+                    <span className="text-base">{EQUIPOS[getPrefijo(s.codigo)]?.bandera ?? "🏳️"}</span>
                     <span className="font-mono font-bold text-green-700 text-sm">{s.codigo}</span>
                     <span className="text-gray-500 text-xs truncate">{s.descripcion}</span>
                   </button>
@@ -303,50 +381,76 @@ export default function MisFiguritas() {
         </form>
 
         {tab === "repetidas" && (
-          <div>
+          <div className="space-y-4">
             {repetidas.length === 0 ? (
               <div className="text-center py-8 text-gray-400">
                 <div className="text-4xl mb-2">📭</div>
                 <p className="font-medium">No cargaste figuritas repetidas todavía</p>
               </div>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {repetidas.map((f) => (
-                  <div key={f.id} className="bg-white rounded-2xl px-3 py-2 shadow-sm flex items-center gap-2">
-                    <span className="font-mono font-bold text-gray-700 text-sm">{f.numero}</span>
-                    {f.repetidas > 1 && (
-                      <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                        x{f.repetidas}
-                      </span>
-                    )}
-                    <button onClick={() => quitarRepetida(f.id, f.repetidas)} className="text-red-400 hover:text-red-600 text-xs font-bold ml-1">
-                      ✕
-                    </button>
+              Array.from(repetidasAgrupadas.entries()).map(([prefijo, items]) => {
+                const equipo = EQUIPOS[prefijo] ?? { nombre: prefijo, bandera: "🏳️" };
+                return (
+                  <div key={prefijo} className="bg-white rounded-3xl px-4 py-3 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xl">{equipo.bandera}</span>
+                      <span className="font-black text-gray-700 text-sm">{equipo.nombre}</span>
+                      <span className="ml-auto text-xs text-gray-400 font-semibold">{items.length} figurita{items.length !== 1 ? "s" : ""}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {items.map((f) => (
+                        <div key={f.id} className="bg-green-50 rounded-xl px-2.5 py-1.5 flex items-center gap-1.5">
+                          <span className="text-sm">{equipo.bandera}</span>
+                          <span className="font-mono font-bold text-gray-700 text-xs">{f.numero}</span>
+                          {f.repetidas > 1 && (
+                            <span className="bg-green-200 text-green-800 text-xs font-bold px-1.5 py-0.5 rounded-full">
+                              x{f.repetidas}
+                            </span>
+                          )}
+                          <button onClick={() => quitarRepetida(f.id, f.repetidas)} className="text-red-300 hover:text-red-500 text-xs font-bold ml-0.5">
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
+                );
+              })
             )}
           </div>
         )}
 
         {tab === "faltantes" && (
-          <div>
+          <div className="space-y-4">
             {faltantes.length === 0 ? (
               <div className="text-center py-8 text-gray-400">
                 <div className="text-4xl mb-2">🎉</div>
                 <p className="font-medium">¡No tenés figuritas pendientes cargadas!</p>
               </div>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {faltantes.map((f) => (
-                  <div key={f.id} className="bg-white rounded-2xl px-3 py-2 shadow-sm flex items-center gap-2">
-                    <span className="font-mono font-bold text-gray-700 text-sm">{f.numero}</span>
-                    <button onClick={() => quitarFaltante(f.id)} className="text-red-400 hover:text-red-600 text-xs font-bold ml-1">
-                      ✕
-                    </button>
+              Array.from(faltantesAgrupadas.entries()).map(([prefijo, items]) => {
+                const equipo = EQUIPOS[prefijo] ?? { nombre: prefijo, bandera: "🏳️" };
+                return (
+                  <div key={prefijo} className="bg-white rounded-3xl px-4 py-3 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xl">{equipo.bandera}</span>
+                      <span className="font-black text-gray-700 text-sm">{equipo.nombre}</span>
+                      <span className="ml-auto text-xs text-gray-400 font-semibold">{items.length} figurita{items.length !== 1 ? "s" : ""}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {items.map((f) => (
+                        <div key={f.id} className="bg-red-50 rounded-xl px-2.5 py-1.5 flex items-center gap-1.5">
+                          <span className="text-sm">{equipo.bandera}</span>
+                          <span className="font-mono font-bold text-gray-700 text-xs">{f.numero}</span>
+                          <button onClick={() => quitarFaltante(f.id)} className="text-red-300 hover:text-red-500 text-xs font-bold ml-0.5">
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
+                );
+              })
             )}
           </div>
         )}
