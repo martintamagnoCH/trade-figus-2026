@@ -21,6 +21,7 @@ export default function MisFiguritas() {
   const [input, setInput] = useState("");
   const [pills, setPills] = useState<string[]>([]);
   const [sugerencias, setSugerencias] = useState<CatalogoItem[]>([]);
+  const [seccionCompleta, setSeccionCompleta] = useState<CatalogoItem[]>([]);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [errorValidacion, setErrorValidacion] = useState<string[]>([]);
@@ -89,10 +90,18 @@ export default function MisFiguritas() {
     const termino = input.trim().toUpperCase();
     if (!termino) {
       setSugerencias([]);
+      setSeccionCompleta([]);
       return;
     }
     const matches = catalogo.filter((c) => c.codigo.startsWith(termino)).slice(0, 6);
     setSugerencias(matches);
+    // Opción "agregar sección entera": solo cuando el input es un prefijo puro conocido (ej: "ARG", "FWC")
+    if (termino in EQUIPOS) {
+      const todos = catalogo.filter((c) => getPrefijo(c.codigo) === termino);
+      setSeccionCompleta(todos);
+    } else {
+      setSeccionCompleta([]);
+    }
   }, [input, catalogo]);
 
   function agregarPill(codigo: string) {
@@ -103,6 +112,20 @@ export default function MisFiguritas() {
     }
     setInput("");
     setSugerencias([]);
+    setSeccionCompleta([]);
+    setErrorValidacion([]);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  }
+
+  function agregarSeccionEntera(items: CatalogoItem[]) {
+    const codigos = items.map((i) => i.codigo);
+    setPills((prev) => {
+      const nuevos = codigos.filter((c) => !prev.includes(c));
+      return [...prev, ...nuevos];
+    });
+    setInput("");
+    setSugerencias([]);
+    setSeccionCompleta([]);
     setErrorValidacion([]);
     setTimeout(() => inputRef.current?.focus(), 0);
   }
@@ -209,6 +232,7 @@ export default function MisFiguritas() {
     setPills([]);
     setErrorValidacion([]);
     setSugerencias([]);
+    setSeccionCompleta([]);
   }
 
   if (cargando) {
@@ -308,8 +332,28 @@ export default function MisFiguritas() {
             </div>
 
             {/* Sugerencias */}
-            {sugerencias.length > 0 && (
+            {(sugerencias.length > 0 || seccionCompleta.length > 0) && (
               <div className="absolute top-full left-0 right-12 bg-white border-2 border-green-200 rounded-2xl shadow-lg mt-1 z-10 overflow-hidden">
+                {/* Opción "agregar sección entera" — solo en faltantes */}
+                {tab === "faltantes" && seccionCompleta.length > 0 && (
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => agregarSeccionEntera(seccionCompleta)}
+                    className="w-full text-left px-4 py-2.5 bg-red-50 hover:bg-red-100 flex items-center gap-3 border-b-2 border-red-200"
+                  >
+                    <Bandera prefijo={input.trim().toUpperCase()} />
+                    <div>
+                      <p className="font-bold text-red-600 text-sm">
+                        Agregar sección completa
+                      </p>
+                      <p className="text-red-400 text-xs">
+                        {EQUIPOS[input.trim().toUpperCase()]?.nombre} — {seccionCompleta.length} figuritas
+                      </p>
+                    </div>
+                    <span className="ml-auto text-red-400 text-lg">➕</span>
+                  </button>
+                )}
                 {sugerencias.map((s) => (
                   <button
                     key={s.codigo}
