@@ -25,6 +25,7 @@ export default function MisFiguritas() {
   const [seccionCompleta, setSeccionCompleta] = useState<CatalogoItem[]>([]);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
+  const [eliminandoId, setEliminandoId] = useState<string | null>(null);
   const [errorValidacion, setErrorValidacion] = useState<string[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -213,18 +214,22 @@ export default function MisFiguritas() {
 
   async function quitarRepetida(id: string, cantidad: number) {
     if (!userId) return;
+    setEliminandoId(id);
     if (cantidad > 1) {
       await supabase.from("figuritas").update({ repetidas: cantidad - 1 }).eq("id", id);
     } else {
       await supabase.from("figuritas").delete().eq("id", id);
     }
     await cargarDatos(userId);
+    setEliminandoId(null);
   }
 
   async function quitarFaltante(id: string) {
     if (!userId) return;
+    setEliminandoId(id);
     await supabase.from("me_faltan").delete().eq("id", id);
     await cargarDatos(userId);
+    setEliminandoId(null);
   }
 
   function cambiarTab(t: "repetidas" | "faltantes") {
@@ -324,11 +329,13 @@ export default function MisFiguritas() {
               <button
                 type="submit"
                 disabled={guardando || (pills.length === 0 && !input.trim())}
-                className={`px-5 py-3 rounded-2xl font-black text-white transition-colors disabled:opacity-50 shrink-0 ${
+                className={`px-5 py-3 rounded-2xl font-black text-white transition-colors disabled:opacity-50 shrink-0 flex items-center justify-center ${
                   tab === "repetidas" ? "bg-green-500 hover:bg-green-600" : "bg-red-400 hover:bg-red-500"
                 }`}
               >
-                {guardando ? "..." : "➕"}
+                {guardando
+                  ? <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  : "➕"}
               </button>
             </div>
 
@@ -408,6 +415,7 @@ export default function MisFiguritas() {
                           variant="verde"
                           cantidad={f.repetidas}
                           onRemove={() => quitarRepetida(f.id, f.repetidas)}
+                          isRemoving={eliminandoId === f.id}
                         />
                       ))}
                     </div>
@@ -442,6 +450,7 @@ export default function MisFiguritas() {
                           codigo={f.numero}
                           variant="rojo"
                           onRemove={() => quitarFaltante(f.id)}
+                          isRemoving={eliminandoId === f.id}
                         />
                       ))}
                     </div>

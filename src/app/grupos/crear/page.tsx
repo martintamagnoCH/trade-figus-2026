@@ -115,7 +115,9 @@ export default function CrearGrupo() {
             disabled={cargando}
             className="w-full bg-green-500 text-white py-3 rounded-2xl font-black text-lg hover:bg-green-600 transition-colors disabled:opacity-50"
           >
-            {cargando ? "Creando..." : "¡Crear grupo!"}
+            {cargando
+              ? <span className="flex items-center justify-center gap-2"><span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />Creando...</span>
+              : "¡Crear grupo!"}
           </button>
         </form>
       </div>

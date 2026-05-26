@@ -27,16 +27,17 @@ const VARIANTES: Record<Variant, { pill: string; badge: string }> = {
 type FiguPillProps = {
   codigo: string;
   variant?: Variant;
-  cantidad?: number;   // muestra "x2", "x3", etc.
+  cantidad?: number;
   onRemove?: () => void;
+  isRemoving?: boolean;
 };
 
-export default function FiguPill({ codigo, variant = "gris", cantidad, onRemove }: FiguPillProps) {
+export default function FiguPill({ codigo, variant = "gris", cantidad, onRemove, isRemoving }: FiguPillProps) {
   const prefijo = getPrefijo(codigo);
   const { pill, badge } = VARIANTES[variant];
 
   return (
-    <div className={`${pill} rounded-xl px-2.5 py-1.5 flex items-center gap-1.5`}>
+    <div className={`${pill} rounded-xl px-2.5 py-1.5 flex items-center gap-1.5 transition-opacity ${isRemoving ? "opacity-40" : ""}`}>
       <Bandera prefijo={prefijo} />
       <span className="font-mono font-bold text-gray-700 text-xs">{codigo}</span>
       {cantidad !== undefined && cantidad > 1 && (
@@ -45,12 +46,9 @@ export default function FiguPill({ codigo, variant = "gris", cantidad, onRemove 
         </span>
       )}
       {onRemove && (
-        <button
-          onClick={onRemove}
-          className="text-red-300 hover:text-red-500 text-xs font-bold ml-0.5 leading-none"
-        >
-          ✕
-        </button>
+        isRemoving
+          ? <span className="ml-0.5 inline-block w-3 h-3 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />
+          : <button onClick={onRemove} className="text-red-300 hover:text-red-500 text-xs font-bold ml-0.5 leading-none">✕</button>
       )}
     </div>
   );
