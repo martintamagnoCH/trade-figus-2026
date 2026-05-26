@@ -20,14 +20,18 @@ export default async function AdminPage() {
 
   const { data: grupos } = await adminSupabase
     .from("grupos")
-    .select(`
-      id,
-      nombre,
-      codigo,
-      created_at,
-      miembros_grupo(count)
-    `)
+    .select("id, nombre, codigo, created_at")
     .order("created_at", { ascending: false });
+
+  // Contar miembros por grupo en una query separada (evita problemas de tipos)
+  const { data: todasMembresias } = await adminSupabase
+    .from("miembros_grupo")
+    .select("grupo_id");
+
+  const countPorGrupo = (todasMembresias ?? []).reduce<Record<string, number>>(
+    (acc, m) => { acc[m.grupo_id] = (acc[m.grupo_id] ?? 0) + 1; return acc; },
+    {}
+  );
 
   const { count: totalUsuarios } = await adminSupabase
     .from("perfiles")
@@ -91,9 +95,7 @@ export default async function AdminPage() {
           ) : (
             <div className="space-y-3">
               {grupos.map((grupo) => {
-                const cantMiembros =
-                  (grupo.miembros_grupo as unknown as { count: number }[])?.[0]
-                    ?.count ?? 0;
+                const cantMiembros = countPorGrupo[grupo.id] ?? 0;
                 const fechaCreacion = new Date(grupo.created_at).toLocaleDateString(
                   "es-AR",
                   { day: "2-digit", month: "short", year: "numeric" }
