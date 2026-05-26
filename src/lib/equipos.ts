@@ -55,13 +55,31 @@ export function getPrefijo(codigo: string): string {
   return codigo.match(/^([A-Z]+)/)?.[1] ?? "?";
 }
 
-// Orden exacto en que aparecen las secciones en el álbum Panini FIFA 2026
+// Orden del álbum Panini FIFA 2026: primero especiales, luego equipos por grupo
 export const ORDEN_ALBUM = [
   "FWC", "MUS",
-  "ALG", "ARG", "AUS", "AUT", "BEL", "BIH", "BRA", "CAN",
-  "CIV", "COD", "COL", "CPV", "CRO", "CUW", "CZE", "ECU",
-  "EGY", "ENG", "ESP", "FRA", "GER", "GHA", "HAI", "IRN",
-  "IRQ", "JOR", "JPN", "KOR", "KSA", "MAR", "MEX", "NED",
-  "NOR", "NZL", "PAN", "PAR", "POR", "QAT", "RSA", "SCO",
-  "SEN", "SUI", "SWE", "TUN", "TUR", "URU", "USA", "UZB",
+  // Grupo A
+  "MEX", "KOR", "RSA", "CZE",
+  // Grupo B
+  "CAN", "SUI", "QAT", "BIH",
+  // Grupo C
+  "BRA", "MAR", "HAI", "SCO",
+  // Grupo D
+  "USA", "PAR", "AUS", "TUR",
+  // Grupo E
+  "GER", "CUW", "CIV", "ECU",
+  // Grupo F
+  "NED", "JPN", "SWE", "TUN",
+  // Grupo G
+  "BEL", "EGY", "IRN", "NZL",
+  // Grupo H
+  "ESP", "CPV", "KSA", "URU",
+  // Grupo I
+  "FRA", "SEN", "IRQ", "NOR",
+  // Grupo J
+  "ARG", "ALG", "AUT", "JOR",
+  // Grupo K
+  "POR", "COD", "UZB", "COL",
+  // Grupo L
+  "ENG", "CRO", "GHA", "PAN",
 ];
