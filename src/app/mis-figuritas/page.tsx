@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import FiguPill, { Bandera } from "@/components/FiguPill";
@@ -11,6 +11,54 @@ type Figurita = { id: string; numero: string; repetidas: number };
 type Faltante = { id: string; numero: string };
 type CatalogoItem = { codigo: string; descripcion: string; seccion: string };
 
+
+function SeparadorGrupo({ nombre }: { nombre: string }) {
+  return (
+    <div className="flex items-center gap-3 pt-2 pb-1">
+      <div className="flex-1 h-px bg-green-200" />
+      <span className="text-xs font-black text-green-600 uppercase tracking-widest px-1">
+        {nombre}
+      </span>
+      <div className="flex-1 h-px bg-green-200" />
+    </div>
+  );
+}
+
+function SeccionesConGrupos<T extends { id: string; numero: string }>({
+  agrupadas,
+  renderItems,
+}: {
+  agrupadas: Map<string, T[]>;
+  renderItems: (prefijo: string, items: T[]) => React.ReactNode;
+}) {
+  let grupoActual = "";
+  const elementos: React.ReactNode[] = [];
+
+  for (const [prefijo, items] of agrupadas.entries()) {
+    const equipo = EQUIPOS[prefijo] ?? { nombre: prefijo, iso: null, grupo: "" };
+    const grupo = equipo.grupo ?? "";
+
+    if (grupo !== grupoActual) {
+      grupoActual = grupo;
+      elementos.push(<SeparadorGrupo key={`sep-${grupo}`} nombre={grupo} />);
+    }
+
+    elementos.push(
+      <div key={prefijo} className="bg-white rounded-3xl px-4 py-3 shadow-sm">
+        <div className="flex items-center gap-2 mb-2">
+          <Bandera prefijo={prefijo} size="lg" />
+          <span className="font-black text-gray-700 text-sm">{equipo.nombre}</span>
+          <span className="ml-auto text-xs text-gray-400 font-semibold">
+            {items.length} figurita{items.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+        <div className="flex flex-wrap gap-2">{renderItems(prefijo, items)}</div>
+      </div>
+    );
+  }
+
+  return <>{elementos}</>;
+}
 
 export default function MisFiguritas() {
   const supabase = createClient();
@@ -391,72 +439,50 @@ export default function MisFiguritas() {
         </form>
 
         {tab === "repetidas" && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {repetidas.length === 0 ? (
               <div className="text-center py-8 text-gray-400">
                 <div className="text-4xl mb-2">📭</div>
                 <p className="font-medium">No cargaste figuritas repetidas todavía</p>
               </div>
             ) : (
-              Array.from(repetidasAgrupadas.entries()).map(([prefijo, items]) => {
-                const equipo = EQUIPOS[prefijo] ?? { nombre: prefijo, iso: null };
-                return (
-                  <div key={prefijo} className="bg-white rounded-3xl px-4 py-3 shadow-sm">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Bandera prefijo={prefijo} size="lg" />
-                      <span className="font-black text-gray-700 text-sm">{equipo.nombre}</span>
-                      <span className="ml-auto text-xs text-gray-400 font-semibold">{items.length} figurita{items.length !== 1 ? "s" : ""}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {items.map((f) => (
-                        <FiguPill
-                          key={f.id}
-                          codigo={f.numero}
-                          variant="verde"
-                          cantidad={f.repetidas}
-                          onRemove={() => quitarRepetida(f.id, f.repetidas)}
-                          isRemoving={eliminandoId === f.id}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                );
-              })
+              <SeccionesConGrupos
+                agrupadas={repetidasAgrupadas}
+                renderItems={(prefijo, items) => items.map((f) => (
+                  <FiguPill
+                    key={f.id}
+                    codigo={f.numero}
+                    variant="verde"
+                    cantidad={f.repetidas}
+                    onRemove={() => quitarRepetida(f.id, f.repetidas)}
+                    isRemoving={eliminandoId === f.id}
+                  />
+                ))}
+              />
             )}
           </div>
         )}
 
         {tab === "faltantes" && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {faltantes.length === 0 ? (
               <div className="text-center py-8 text-gray-400">
                 <div className="text-4xl mb-2">🎉</div>
                 <p className="font-medium">¡No tenés figuritas pendientes cargadas!</p>
               </div>
             ) : (
-              Array.from(faltantesAgrupadas.entries()).map(([prefijo, items]) => {
-                const equipo = EQUIPOS[prefijo] ?? { nombre: prefijo, iso: null };
-                return (
-                  <div key={prefijo} className="bg-white rounded-3xl px-4 py-3 shadow-sm">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Bandera prefijo={prefijo} size="lg" />
-                      <span className="font-black text-gray-700 text-sm">{equipo.nombre}</span>
-                      <span className="ml-auto text-xs text-gray-400 font-semibold">{items.length} figurita{items.length !== 1 ? "s" : ""}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {items.map((f) => (
-                        <FiguPill
-                          key={f.id}
-                          codigo={f.numero}
-                          variant="rojo"
-                          onRemove={() => quitarFaltante(f.id)}
-                          isRemoving={eliminandoId === f.id}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                );
-              })
+              <SeccionesConGrupos
+                agrupadas={faltantesAgrupadas}
+                renderItems={(prefijo, items) => items.map((f) => (
+                  <FiguPill
+                    key={f.id}
+                    codigo={f.numero}
+                    variant="rojo"
+                    onRemove={() => quitarFaltante(f.id)}
+                    isRemoving={eliminandoId === f.id}
+                  />
+                ))}
+              />
             )}
           </div>
         )}
