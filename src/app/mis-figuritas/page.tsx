@@ -3,66 +3,81 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import "flag-icons/css/flag-icons.min.css";
 
 type Figurita = { id: string; numero: string; repetidas: number };
 type Faltante = { id: string; numero: string };
 type CatalogoItem = { codigo: string; descripcion: string; seccion: string };
 
-const EQUIPOS: Record<string, { nombre: string; bandera: string }> = {
-  FWC: { nombre: "Apertura",             bandera: "⚽" },
-  MUS: { nombre: "FIFA Museum",          bandera: "🏆" },
-  ALG: { nombre: "Algeria",             bandera: "🇩🇿" },
-  ARG: { nombre: "Argentina",           bandera: "🇦🇷" },
-  AUS: { nombre: "Australia",           bandera: "🇦🇺" },
-  AUT: { nombre: "Austria",             bandera: "🇦🇹" },
-  BEL: { nombre: "Bélgica",             bandera: "🇧🇪" },
-  BIH: { nombre: "Bosnia y Herzegovina",bandera: "🇧🇦" },
-  BRA: { nombre: "Brasil",              bandera: "🇧🇷" },
-  CAN: { nombre: "Canadá",              bandera: "🇨🇦" },
-  CIV: { nombre: "Costa de Marfil",     bandera: "🇨🇮" },
-  COD: { nombre: "Congo DR",            bandera: "🇨🇩" },
-  COL: { nombre: "Colombia",            bandera: "🇨🇴" },
-  CPV: { nombre: "Cabo Verde",          bandera: "🇨🇻" },
-  CRO: { nombre: "Croacia",             bandera: "🇭🇷" },
-  CUW: { nombre: "Curaçao",             bandera: "🇨🇼" },
-  CZE: { nombre: "República Checa",     bandera: "🇨🇿" },
-  ECU: { nombre: "Ecuador",             bandera: "🇪🇨" },
-  EGY: { nombre: "Egipto",              bandera: "🇪🇬" },
-  ENG: { nombre: "Inglaterra",          bandera: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
-  ESP: { nombre: "España",              bandera: "🇪🇸" },
-  FRA: { nombre: "Francia",             bandera: "🇫🇷" },
-  GER: { nombre: "Alemania",            bandera: "🇩🇪" },
-  GHA: { nombre: "Ghana",               bandera: "🇬🇭" },
-  HAI: { nombre: "Haití",               bandera: "🇭🇹" },
-  IRN: { nombre: "Irán",                bandera: "🇮🇷" },
-  IRQ: { nombre: "Irak",                bandera: "🇮🇶" },
-  JOR: { nombre: "Jordania",            bandera: "🇯🇴" },
-  JPN: { nombre: "Japón",               bandera: "🇯🇵" },
-  KOR: { nombre: "Corea del Sur",       bandera: "🇰🇷" },
-  KSA: { nombre: "Arabia Saudita",      bandera: "🇸🇦" },
-  MAR: { nombre: "Marruecos",           bandera: "🇲🇦" },
-  MEX: { nombre: "México",              bandera: "🇲🇽" },
-  NED: { nombre: "Países Bajos",        bandera: "🇳🇱" },
-  NOR: { nombre: "Noruega",             bandera: "🇳🇴" },
-  NZL: { nombre: "Nueva Zelanda",       bandera: "🇳🇿" },
-  PAN: { nombre: "Panamá",              bandera: "🇵🇦" },
-  PAR: { nombre: "Paraguay",            bandera: "🇵🇾" },
-  POR: { nombre: "Portugal",            bandera: "🇵🇹" },
-  QAT: { nombre: "Qatar",               bandera: "🇶🇦" },
-  RSA: { nombre: "Sudáfrica",           bandera: "🇿🇦" },
-  SCO: { nombre: "Escocia",             bandera: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
-  SEN: { nombre: "Senegal",             bandera: "🇸🇳" },
-  SUI: { nombre: "Suiza",               bandera: "🇨🇭" },
-  SWE: { nombre: "Suecia",              bandera: "🇸🇪" },
-  TUN: { nombre: "Túnez",               bandera: "🇹🇳" },
-  TUR: { nombre: "Turquía",             bandera: "🇹🇷" },
-  URU: { nombre: "Uruguay",             bandera: "🇺🇾" },
-  USA: { nombre: "Estados Unidos",      bandera: "🇺🇸" },
-  UZB: { nombre: "Uzbekistán",          bandera: "🇺🇿" },
+// iso: código ISO 3166-1 alpha-2 para flag-icons. null = usar emoji.
+const EQUIPOS: Record<string, { nombre: string; iso: string | null; emoji?: string }> = {
+  FWC: { nombre: "Apertura",              iso: null, emoji: "⚽" },
+  MUS: { nombre: "FIFA Museum",           iso: null, emoji: "🏆" },
+  ALG: { nombre: "Algeria",              iso: "dz" },
+  ARG: { nombre: "Argentina",            iso: "ar" },
+  AUS: { nombre: "Australia",            iso: "au" },
+  AUT: { nombre: "Austria",              iso: "at" },
+  BEL: { nombre: "Bélgica",              iso: "be" },
+  BIH: { nombre: "Bosnia y Herzegovina", iso: "ba" },
+  BRA: { nombre: "Brasil",               iso: "br" },
+  CAN: { nombre: "Canadá",               iso: "ca" },
+  CIV: { nombre: "Costa de Marfil",      iso: "ci" },
+  COD: { nombre: "Congo DR",             iso: "cd" },
+  COL: { nombre: "Colombia",             iso: "co" },
+  CPV: { nombre: "Cabo Verde",           iso: "cv" },
+  CRO: { nombre: "Croacia",              iso: "hr" },
+  CUW: { nombre: "Curaçao",              iso: "cw" },
+  CZE: { nombre: "República Checa",      iso: "cz" },
+  ECU: { nombre: "Ecuador",              iso: "ec" },
+  EGY: { nombre: "Egipto",               iso: "eg" },
+  ENG: { nombre: "Inglaterra",           iso: "gb-eng" },
+  ESP: { nombre: "España",               iso: "es" },
+  FRA: { nombre: "Francia",              iso: "fr" },
+  GER: { nombre: "Alemania",             iso: "de" },
+  GHA: { nombre: "Ghana",                iso: "gh" },
+  HAI: { nombre: "Haití",                iso: "ht" },
+  IRN: { nombre: "Irán",                 iso: "ir" },
+  IRQ: { nombre: "Irak",                 iso: "iq" },
+  JOR: { nombre: "Jordania",             iso: "jo" },
+  JPN: { nombre: "Japón",                iso: "jp" },
+  KOR: { nombre: "Corea del Sur",        iso: "kr" },
+  KSA: { nombre: "Arabia Saudita",       iso: "sa" },
+  MAR: { nombre: "Marruecos",            iso: "ma" },
+  MEX: { nombre: "México",               iso: "mx" },
+  NED: { nombre: "Países Bajos",         iso: "nl" },
+  NOR: { nombre: "Noruega",              iso: "no" },
+  NZL: { nombre: "Nueva Zelanda",        iso: "nz" },
+  PAN: { nombre: "Panamá",               iso: "pa" },
+  PAR: { nombre: "Paraguay",             iso: "py" },
+  POR: { nombre: "Portugal",             iso: "pt" },
+  QAT: { nombre: "Qatar",                iso: "qa" },
+  RSA: { nombre: "Sudáfrica",            iso: "za" },
+  SCO: { nombre: "Escocia",              iso: "gb-sct" },
+  SEN: { nombre: "Senegal",              iso: "sn" },
+  SUI: { nombre: "Suiza",                iso: "ch" },
+  SWE: { nombre: "Suecia",               iso: "se" },
+  TUN: { nombre: "Túnez",                iso: "tn" },
+  TUR: { nombre: "Turquía",              iso: "tr" },
+  URU: { nombre: "Uruguay",              iso: "uy" },
+  USA: { nombre: "Estados Unidos",       iso: "us" },
+  UZB: { nombre: "Uzbekistán",           iso: "uz" },
 };
 
 function getPrefijo(codigo: string): string {
   return codigo.match(/^([A-Z]+)/)?.[1] ?? "?";
+}
+
+function Bandera({ prefijo, size = "sm" }: { prefijo: string; size?: "sm" | "lg" }) {
+  const equipo = EQUIPOS[prefijo];
+  const cls = size === "lg" ? "text-xl" : "text-base";
+  if (!equipo) return <span className={cls}>🏳️</span>;
+  if (!equipo.iso) return <span className={cls}>{equipo.emoji}</span>;
+  return (
+    <span
+      className={`fi fi-${equipo.iso} rounded-sm`}
+      style={{ fontSize: size === "lg" ? "1.25rem" : "1rem" }}
+    />
+  );
 }
 
 export default function MisFiguritas() {
@@ -360,7 +375,7 @@ export default function MisFiguritas() {
                     onClick={() => agregarPill(s.codigo)}
                     className="w-full text-left px-4 py-2 hover:bg-green-50 flex items-center gap-3 border-b border-gray-100 last:border-0"
                   >
-                    <span className="text-base">{EQUIPOS[getPrefijo(s.codigo)]?.bandera ?? "🏳️"}</span>
+                    <Bandera prefijo={getPrefijo(s.codigo)} />
                     <span className="font-mono font-bold text-green-700 text-sm">{s.codigo}</span>
                     <span className="text-gray-500 text-xs truncate">{s.descripcion}</span>
                   </button>
@@ -393,14 +408,14 @@ export default function MisFiguritas() {
                 return (
                   <div key={prefijo} className="bg-white rounded-3xl px-4 py-3 shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xl">{equipo.bandera}</span>
+                      <Bandera prefijo={prefijo} size="lg" />
                       <span className="font-black text-gray-700 text-sm">{equipo.nombre}</span>
                       <span className="ml-auto text-xs text-gray-400 font-semibold">{items.length} figurita{items.length !== 1 ? "s" : ""}</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {items.map((f) => (
                         <div key={f.id} className="bg-green-50 rounded-xl px-2.5 py-1.5 flex items-center gap-1.5">
-                          <span className="text-sm">{equipo.bandera}</span>
+                          <Bandera prefijo={prefijo} />
                           <span className="font-mono font-bold text-gray-700 text-xs">{f.numero}</span>
                           {f.repetidas > 1 && (
                             <span className="bg-green-200 text-green-800 text-xs font-bold px-1.5 py-0.5 rounded-full">
@@ -433,14 +448,14 @@ export default function MisFiguritas() {
                 return (
                   <div key={prefijo} className="bg-white rounded-3xl px-4 py-3 shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xl">{equipo.bandera}</span>
+                      <Bandera prefijo={prefijo} size="lg" />
                       <span className="font-black text-gray-700 text-sm">{equipo.nombre}</span>
                       <span className="ml-auto text-xs text-gray-400 font-semibold">{items.length} figurita{items.length !== 1 ? "s" : ""}</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {items.map((f) => (
                         <div key={f.id} className="bg-red-50 rounded-xl px-2.5 py-1.5 flex items-center gap-1.5">
-                          <span className="text-sm">{equipo.bandera}</span>
+                          <Bandera prefijo={prefijo} />
                           <span className="font-mono font-bold text-gray-700 text-xs">{f.numero}</span>
                           <button onClick={() => quitarFaltante(f.id)} className="text-red-300 hover:text-red-500 text-xs font-bold ml-0.5">
                             ✕
