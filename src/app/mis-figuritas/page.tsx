@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import FiguPill, { Bandera } from "@/components/FiguPill";
 import { EQUIPOS, getPrefijo, ORDEN_ALBUM } from "@/lib/equipos";
+import BottomNav from "@/components/BottomNav";
 
 type Figurita = { id: string; numero: string; repetidas: number };
 type Faltante = { id: string; numero: string };
@@ -451,6 +452,7 @@ export default function MisFiguritas() {
           </div>
         )}
       </div>
+      <BottomNav />
     </div>
   );
 }

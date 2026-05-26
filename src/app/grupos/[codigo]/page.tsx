@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import BotonCopiarLink from "./BotonCopiarLink";
 import FiguPill from "@/components/FiguPill";
+import BottomNav from "@/components/BottomNav";
 
 type Match = {
   usuario: string;
@@ -110,7 +111,7 @@ export default async function GrupoPage({
   const esCreador = grupo.creado_por === user.id;
 
   return (
-    <div className="min-h-screen bg-green-50 pb-8">
+    <div className="min-h-screen bg-green-50 pb-24">
       <div className="bg-gradient-to-r from-green-500 to-green-600 px-5 pt-12 pb-8 text-white">
         <Link
           href="/dashboard"
@@ -240,6 +241,7 @@ export default async function GrupoPage({
           </div>
         </div>
       </div>
+      <BottomNav />
     </div>
   );
 }
