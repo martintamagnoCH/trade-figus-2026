@@ -3,82 +3,13 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import "flag-icons/css/flag-icons.min.css";
+import FiguPill, { Bandera } from "@/components/FiguPill";
+import { EQUIPOS, getPrefijo } from "@/lib/equipos";
 
 type Figurita = { id: string; numero: string; repetidas: number };
 type Faltante = { id: string; numero: string };
 type CatalogoItem = { codigo: string; descripcion: string; seccion: string };
 
-// iso: código ISO 3166-1 alpha-2 para flag-icons. null = usar emoji.
-const EQUIPOS: Record<string, { nombre: string; iso: string | null; emoji?: string }> = {
-  FWC: { nombre: "Apertura",              iso: null, emoji: "⚽" },
-  MUS: { nombre: "FIFA Museum",           iso: null, emoji: "🏆" },
-  ALG: { nombre: "Algeria",              iso: "dz" },
-  ARG: { nombre: "Argentina",            iso: "ar" },
-  AUS: { nombre: "Australia",            iso: "au" },
-  AUT: { nombre: "Austria",              iso: "at" },
-  BEL: { nombre: "Bélgica",              iso: "be" },
-  BIH: { nombre: "Bosnia y Herzegovina", iso: "ba" },
-  BRA: { nombre: "Brasil",               iso: "br" },
-  CAN: { nombre: "Canadá",               iso: "ca" },
-  CIV: { nombre: "Costa de Marfil",      iso: "ci" },
-  COD: { nombre: "Congo DR",             iso: "cd" },
-  COL: { nombre: "Colombia",             iso: "co" },
-  CPV: { nombre: "Cabo Verde",           iso: "cv" },
-  CRO: { nombre: "Croacia",              iso: "hr" },
-  CUW: { nombre: "Curaçao",              iso: "cw" },
-  CZE: { nombre: "República Checa",      iso: "cz" },
-  ECU: { nombre: "Ecuador",              iso: "ec" },
-  EGY: { nombre: "Egipto",               iso: "eg" },
-  ENG: { nombre: "Inglaterra",           iso: "gb-eng" },
-  ESP: { nombre: "España",               iso: "es" },
-  FRA: { nombre: "Francia",              iso: "fr" },
-  GER: { nombre: "Alemania",             iso: "de" },
-  GHA: { nombre: "Ghana",                iso: "gh" },
-  HAI: { nombre: "Haití",                iso: "ht" },
-  IRN: { nombre: "Irán",                 iso: "ir" },
-  IRQ: { nombre: "Irak",                 iso: "iq" },
-  JOR: { nombre: "Jordania",             iso: "jo" },
-  JPN: { nombre: "Japón",                iso: "jp" },
-  KOR: { nombre: "Corea del Sur",        iso: "kr" },
-  KSA: { nombre: "Arabia Saudita",       iso: "sa" },
-  MAR: { nombre: "Marruecos",            iso: "ma" },
-  MEX: { nombre: "México",               iso: "mx" },
-  NED: { nombre: "Países Bajos",         iso: "nl" },
-  NOR: { nombre: "Noruega",              iso: "no" },
-  NZL: { nombre: "Nueva Zelanda",        iso: "nz" },
-  PAN: { nombre: "Panamá",               iso: "pa" },
-  PAR: { nombre: "Paraguay",             iso: "py" },
-  POR: { nombre: "Portugal",             iso: "pt" },
-  QAT: { nombre: "Qatar",                iso: "qa" },
-  RSA: { nombre: "Sudáfrica",            iso: "za" },
-  SCO: { nombre: "Escocia",              iso: "gb-sct" },
-  SEN: { nombre: "Senegal",              iso: "sn" },
-  SUI: { nombre: "Suiza",                iso: "ch" },
-  SWE: { nombre: "Suecia",               iso: "se" },
-  TUN: { nombre: "Túnez",                iso: "tn" },
-  TUR: { nombre: "Turquía",              iso: "tr" },
-  URU: { nombre: "Uruguay",              iso: "uy" },
-  USA: { nombre: "Estados Unidos",       iso: "us" },
-  UZB: { nombre: "Uzbekistán",           iso: "uz" },
-};
-
-function getPrefijo(codigo: string): string {
-  return codigo.match(/^([A-Z]+)/)?.[1] ?? "?";
-}
-
-function Bandera({ prefijo, size = "sm" }: { prefijo: string; size?: "sm" | "lg" }) {
-  const equipo = EQUIPOS[prefijo];
-  const cls = size === "lg" ? "text-xl" : "text-base";
-  if (!equipo) return <span className={cls}>🏳️</span>;
-  if (!equipo.iso) return <span className={cls}>{equipo.emoji}</span>;
-  return (
-    <span
-      className={`fi fi-${equipo.iso} rounded-sm`}
-      style={{ fontSize: size === "lg" ? "1.25rem" : "1rem" }}
-    />
-  );
-}
 
 export default function MisFiguritas() {
   const supabase = createClient();
@@ -404,7 +335,7 @@ export default function MisFiguritas() {
               </div>
             ) : (
               Array.from(repetidasAgrupadas.entries()).map(([prefijo, items]) => {
-                const equipo = EQUIPOS[prefijo] ?? { nombre: prefijo, bandera: "🏳️" };
+                const equipo = EQUIPOS[prefijo] ?? { nombre: prefijo, iso: null };
                 return (
                   <div key={prefijo} className="bg-white rounded-3xl px-4 py-3 shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
@@ -414,18 +345,13 @@ export default function MisFiguritas() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {items.map((f) => (
-                        <div key={f.id} className="bg-green-50 rounded-xl px-2.5 py-1.5 flex items-center gap-1.5">
-                          <Bandera prefijo={prefijo} />
-                          <span className="font-mono font-bold text-gray-700 text-xs">{f.numero}</span>
-                          {f.repetidas > 1 && (
-                            <span className="bg-green-200 text-green-800 text-xs font-bold px-1.5 py-0.5 rounded-full">
-                              x{f.repetidas}
-                            </span>
-                          )}
-                          <button onClick={() => quitarRepetida(f.id, f.repetidas)} className="text-red-300 hover:text-red-500 text-xs font-bold ml-0.5">
-                            ✕
-                          </button>
-                        </div>
+                        <FiguPill
+                          key={f.id}
+                          codigo={f.numero}
+                          variant="verde"
+                          cantidad={f.repetidas}
+                          onRemove={() => quitarRepetida(f.id, f.repetidas)}
+                        />
                       ))}
                     </div>
                   </div>
@@ -444,7 +370,7 @@ export default function MisFiguritas() {
               </div>
             ) : (
               Array.from(faltantesAgrupadas.entries()).map(([prefijo, items]) => {
-                const equipo = EQUIPOS[prefijo] ?? { nombre: prefijo, bandera: "🏳️" };
+                const equipo = EQUIPOS[prefijo] ?? { nombre: prefijo, iso: null };
                 return (
                   <div key={prefijo} className="bg-white rounded-3xl px-4 py-3 shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
@@ -454,13 +380,12 @@ export default function MisFiguritas() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {items.map((f) => (
-                        <div key={f.id} className="bg-red-50 rounded-xl px-2.5 py-1.5 flex items-center gap-1.5">
-                          <Bandera prefijo={prefijo} />
-                          <span className="font-mono font-bold text-gray-700 text-xs">{f.numero}</span>
-                          <button onClick={() => quitarFaltante(f.id)} className="text-red-300 hover:text-red-500 text-xs font-bold ml-0.5">
-                            ✕
-                          </button>
-                        </div>
+                        <FiguPill
+                          key={f.id}
+                          codigo={f.numero}
+                          variant="rojo"
+                          onRemove={() => quitarFaltante(f.id)}
+                        />
                       ))}
                     </div>
                   </div>

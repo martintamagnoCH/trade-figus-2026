@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import BotonCopiarLink from "./BotonCopiarLink";
+import FiguPill from "@/components/FiguPill";
 
 type Match = {
   usuario: string;
@@ -185,12 +186,7 @@ export default async function GrupoPage({
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {match.puedesDarte.map((n) => (
-                          <span
-                            key={n}
-                            className="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full"
-                          >
-                            {n}
-                          </span>
+                          <FiguPill key={n} codigo={n} variant="verde" />
                         ))}
                       </div>
                     </div>
@@ -203,12 +199,7 @@ export default async function GrupoPage({
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {match.puedesDarle.map((n) => (
-                          <span
-                            key={n}
-                            className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full"
-                          >
-                            {n}
-                          </span>
+                          <FiguPill key={n} codigo={n} variant="azul" />
                         ))}
                       </div>
                     </div>
