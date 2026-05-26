@@ -1,6 +1,8 @@
 export const EQUIPOS: Record<string, { nombre: string; iso: string | null; emoji?: string }> = {
-  FWC: { nombre: "Apertura",              iso: null, emoji: "⚽" },
-  MUS: { nombre: "FIFA Museum",           iso: null, emoji: "🏆" },
+  "00": { nombre: "Apertura",             iso: null, emoji: "⚽" },
+  FWC:  { nombre: "Apertura",             iso: null, emoji: "⚽" },
+  MUS:  { nombre: "FIFA Museum",          iso: null, emoji: "🏆" },
+  HIS:  { nombre: "Historia",             iso: null, emoji: "📖" },
   ALG: { nombre: "Algeria",              iso: "dz" },
   ARG: { nombre: "Argentina",            iso: "ar" },
   AUS: { nombre: "Australia",            iso: "au" },
@@ -52,12 +54,15 @@ export const EQUIPOS: Record<string, { nombre: string; iso: string | null; emoji
 };
 
 export function getPrefijo(codigo: string): string {
-  return codigo.match(/^([A-Z]+)/)?.[1] ?? "?";
+  // FWC9–FWC19 son la sección "Historia" (va al final del álbum)
+  if (/^FWC(9|1[0-9])$/.test(codigo)) return "HIS";
+  // Códigos especiales sin letras (ej: "00")
+  return codigo.match(/^([A-Z]+)/)?.[1] ?? codigo;
 }
 
 // Orden del álbum Panini FIFA 2026: primero especiales, luego equipos por grupo
 export const ORDEN_ALBUM = [
-  "FWC", "MUS",
+  "00", "FWC", "MUS",
   // Grupo A
   "MEX", "KOR", "RSA", "CZE",
   // Grupo B
@@ -82,4 +87,6 @@ export const ORDEN_ALBUM = [
   "POR", "COD", "UZB", "COL",
   // Grupo L
   "ENG", "CRO", "GHA", "PAN",
+  // Al final
+  "HIS",
 ];

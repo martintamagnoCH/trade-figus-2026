@@ -53,21 +53,28 @@ const equipos = [
 
 const rows = [];
 
-// Sección apertura (FWC1-FWC9)
+// Figurita especial (código sin prefijo)
+rows.push({ codigo: '00', descripcion: 'Logo Panini (FOIL)', seccion: 'Apertura' });
+
+// Sección Apertura (FWC1-FWC8)
 const apertura = [
-  'Logo Panini (FOIL)',
-  'Emblema Oficial (FOIL)',
-  'Mascota Oficial (FOIL)',
-  'Slogan Oficial (FOIL)',
-  'Balón Oficial (FOIL)',
-  'Sede - Estados Unidos (FOIL)',
-  'Sede - Canadá (FOIL)',
-  'Sede - México (FOIL)',
-  'Cartel del Torneo (FOIL)',
+  'Emblema Oficial (FOIL)',        // FWC1
+  'Mascota Oficial (FOIL)',        // FWC2
+  'Slogan Oficial (FOIL)',         // FWC3
+  'Balón Oficial (FOIL)',          // FWC4
+  'Sede - Estados Unidos (FOIL)', // FWC5
+  'Sede - Canadá (FOIL)',          // FWC6
+  'Sede - México (FOIL)',          // FWC7
+  'Cartel del Torneo (FOIL)',      // FWC8
 ];
 apertura.forEach((desc, i) => {
   rows.push({ codigo: `FWC${i + 1}`, descripcion: desc, seccion: 'Apertura' });
 });
+
+// Sección Historia (FWC9-FWC19)
+for (let n = 9; n <= 19; n++) {
+  rows.push({ codigo: `FWC${n}`, descripcion: 'Historia del Mundial', seccion: 'Historia' });
+}
 
 // Sección FIFA Museum (MUS1-MUS11)
 const museum = [
