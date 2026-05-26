@@ -4,6 +4,8 @@ import Link from "next/link";
 import CerrarSesion from "@/components/CerrarSesion";
 import BottomNav from "@/components/BottomNav";
 
+const ADMIN_EMAIL = "mtamagno@gmail.com";
+
 export default async function Dashboard() {
   const supabase = await createClient();
   const {
@@ -35,6 +37,8 @@ export default async function Dashboard() {
         ).data ?? []
       : [];
 
+  const esAdmin = user.email === ADMIN_EMAIL;
+
   return (
     <div className="min-h-screen bg-green-50 pb-24">
       <div className="bg-gradient-to-r from-green-500 to-green-600 px-5 pt-12 pb-8 text-white">
@@ -45,7 +49,18 @@ export default async function Dashboard() {
               {perfil?.nombre ?? "jugador"}! 👋
             </h1>
           </div>
-          <CerrarSesion />
+          <div className="flex items-center gap-2">
+            {esAdmin && (
+              <Link
+                href="/admin"
+                className="bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-colors"
+                title="Panel de administración"
+              >
+                🛡️ Admin
+              </Link>
+            )}
+            <CerrarSesion />
+          </div>
         </div>
       </div>
 

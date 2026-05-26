@@ -1,9 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import BotonCopiarLink from "./BotonCopiarLink";
 import FiguPill from "@/components/FiguPill";
 import BottomNav from "@/components/BottomNav";
+
+const ADMIN_EMAIL = "mtamagno@gmail.com";
 
 type Match = {
   usuario: string;
@@ -24,7 +27,11 @@ export default async function GrupoPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: grupo } = await supabase
+  const esAdmin = user.email === ADMIN_EMAIL;
+  // Admin usa cliente privilegiado para ver grupos donde no es miembro
+  const groupClient = esAdmin ? createAdminClient() : supabase;
+
+  const { data: grupo } = await groupClient
     .from("grupos")
     .select("id, nombre, codigo, creado_por")
     .eq("codigo", codigo)
@@ -39,9 +46,10 @@ export default async function GrupoPage({
     .eq("usuario_id", user.id)
     .single();
 
-  if (!esMiembro) redirect("/dashboard");
+  // El admin puede ver cualquier grupo aunque no sea miembro
+  if (!esMiembro && !esAdmin) redirect("/dashboard");
 
-  const { data: miembros } = await supabase
+  const { data: miembros } = await groupClient
     .from("miembros_grupo")
     .select("usuario_id")
     .eq("grupo_id", grupo.id);
@@ -49,7 +57,7 @@ export default async function GrupoPage({
   const todosUsuarioIds = (miembros ?? []).map((m) => m.usuario_id);
   const otrosIds = todosUsuarioIds.filter((id) => id !== user.id);
 
-  const { data: perfiles } = await supabase
+  const { data: perfiles } = await groupClient
     .from("perfiles")
     .select("id, nombre")
     .in("id", todosUsuarioIds.length > 0 ? todosUsuarioIds : [user.id]);
@@ -59,7 +67,7 @@ export default async function GrupoPage({
   );
 
   // Traer el token de invitación activo
-  const { data: invitacion } = await supabase
+  const { data: invitacion } = await groupClient
     .from("invitaciones")
     .select("token")
     .eq("grupo_id", grupo.id)
@@ -82,12 +90,12 @@ export default async function GrupoPage({
   const matches: Match[] = [];
 
   for (const otroId of otrosIds) {
-    const { data: susRepetidas } = await supabase
+    const { data: susRepetidas } = await groupClient
       .from("figuritas")
       .select("numero")
       .eq("usuario_id", otroId);
 
-    const { data: susFaltantes } = await supabase
+    const { data: susFaltantes } = await groupClient
       .from("me_faltan")
       .select("numero")
       .eq("usuario_id", otroId);
@@ -109,15 +117,16 @@ export default async function GrupoPage({
   }
 
   const esCreador = grupo.creado_por === user.id;
+  const vistaAdmin = esAdmin && !esMiembro;
 
   return (
     <div className="min-h-screen bg-green-50 pb-24">
       <div className="bg-gradient-to-r from-green-500 to-green-600 px-5 pt-12 pb-8 text-white">
         <Link
-          href="/dashboard"
+          href={vistaAdmin ? "/admin" : "/dashboard"}
           className="text-green-100 text-sm font-semibold mb-4 block"
         >
-          ← Mis grupos
+          {vistaAdmin ? "← Panel admin" : "← Mis grupos"}
         </Link>
         <h1 className="text-2xl font-black">{grupo.nombre}</h1>
         <p className="text-green-100 text-sm mt-1">
@@ -127,6 +136,14 @@ export default async function GrupoPage({
       </div>
 
       <div className="px-4 -mt-4 space-y-4">
+        {/* Banner modo admin */}
+        {vistaAdmin && (
+          <div className="bg-gray-800 text-white rounded-2xl px-4 py-3 flex items-center gap-2 text-sm">
+            <span>🛡️</span>
+            <span className="font-semibold">Vista de administrador — solo lectura</span>
+          </div>
+        )}
+
         {/* Link de invitación */}
         {invitacion && (
           <BotonCopiarLink token={invitacion.token} esCreador={esCreador} />
